@@ -425,228 +425,230 @@
     </div>
   </div>
 
-  <script>
-    // ----- DATA (edit / extend this list) -----
-    const vocab = [
-      { german: "Haus", english: "house", plural: "Häuser", example: "Das Haus ist groß." },
-      { german: "Maus", english: "mouse", plural: "Mäuse", example: "Die Maus ist klein." },
-      { german: "Pferd", english: "horse", plural: "Pferde", example: "Das Pferd läuft schnell." },
-      { german: "Heim", english: "home", plural: "Heime", example: "Mein Heim ist gemütlich." },
-      { german: "Baum", english: "tree", plural: "Bäume", example: "Der Baum ist alt." },
-    ];
+<script>
+  // ----- STATE -----
+  let vocab = [];
+  let wordQueue = [];
+  let currentWord = null;
+  let options = [];
+  let selectedAnswer = null;
+  let answerChecked = false;
 
-    // ----- STATE -----
-    let wordQueue = [];
-    let currentWord = null;
-    let options = [];
-    let selectedAnswer = null;
-    let answerChecked = false;
+  let correctCount = 0;
+  let wrongCount = 0;
 
-    let correctCount = 0;
-    let wrongCount = 0;
+  // ----- DOM ELEMENTS -----
+  const germanWordEl = document.getElementById("germanWord");
+  const pluralTextEl = document.getElementById("pluralText");
+  const exampleTextEl = document.getElementById("exampleText");
+  const showPluralEl = document.getElementById("showPlural");
+  const showExampleEl = document.getElementById("showExample");
 
-    // ----- DOM ELEMENTS -----
-    const germanWordEl = document.getElementById("germanWord");
-    const pluralTextEl = document.getElementById("pluralText");
-    const exampleTextEl = document.getElementById("exampleText");
-    const showPluralEl = document.getElementById("showPlural");
-    const showExampleEl = document.getElementById("showExample");
+  const optionsListEl = document.getElementById("optionsList");
+  const checkBtnEl = document.getElementById("checkBtn");
+  const nextBtnEl = document.getElementById("nextBtn");
 
-    const optionsListEl = document.getElementById("optionsList");
-    const checkBtnEl = document.getElementById("checkBtn");
-    const nextBtnEl = document.getElementById("nextBtn");
+  const alertCardEl = document.getElementById("alertCard");
+  const alertIconEl = document.getElementById("alertIcon");
+  const alertTitleEl = document.getElementById("alertTitle");
+  const alertTextEl = document.getElementById("alertText");
 
-    const alertCardEl = document.getElementById("alertCard");
-    const alertIconEl = document.getElementById("alertIcon");
-    const alertTitleEl = document.getElementById("alertTitle");
-    const alertTextEl = document.getElementById("alertText");
+  const progressSubtitleEl = document.getElementById("progressSubtitle");
+  const progressFillEl = document.getElementById("progressFill");
+  const statCorrectEl = document.getElementById("statCorrect");
+  const statWrongEl = document.getElementById("statWrong");
+  const statTotalEl = document.getElementById("statTotal");
+  const statAccuracyEl = document.getElementById("statAccuracy");
+  const statRemainingEl = document.getElementById("statRemaining");
 
-    const progressSubtitleEl = document.getElementById("progressSubtitle");
-    const progressFillEl = document.getElementById("progressFill");
-    const statCorrectEl = document.getElementById("statCorrect");
-    const statWrongEl = document.getElementById("statWrong");
-    const statTotalEl = document.getElementById("statTotal");
-    const statAccuracyEl = document.getElementById("statAccuracy");
-    const statRemainingEl = document.getElementById("statRemaining");
-
-    // ----- HELPERS -----
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
+  // ----- HELPERS -----
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
+    return a;
+  }
 
-    function setupNewRoundIfNeeded() {
-      if (!wordQueue.length) {
-        wordQueue = shuffle(vocab);
-        // Optional: small message in subtitle
-        progressSubtitleEl.textContent = "New round started. Keep going!";
-      }
+  function setupNewRoundIfNeeded() {
+    if (!wordQueue.length) {
+      wordQueue = shuffle(vocab);
+      progressSubtitleEl.textContent = "New round started. Keep going!";
     }
+  }
 
-    function setupNewQuestion() {
-      setupNewRoundIfNeeded();
-      currentWord = wordQueue.pop();
-      selectedAnswer = null;
-      answerChecked = false;
-      hideAlert();
+  function setupNewQuestion() {
+    setupNewRoundIfNeeded();
+    currentWord = wordQueue.pop();
+    selectedAnswer = null;
+    answerChecked = false;
+    hideAlert();
 
-      germanWordEl.textContent = currentWord.german;
-      updateMetaVisibility();
+    germanWordEl.textContent = currentWord.german;
+    updateMetaVisibility();
 
-      const correct = currentWord.english;
-      const wrongAnswers = vocab
-        .filter(w => w.english !== correct)
-        .map(w => w.english);
-      const wrongOptions = shuffle(wrongAnswers).slice(0, Math.min(3, wrongAnswers.length));
-      options = shuffle([...wrongOptions, correct]);
+    const correct = currentWord.english;
+    const wrongAnswers = vocab
+      .filter(w => w.english !== correct)
+      .map(w => w.english);
+    const wrongOptions = shuffle(wrongAnswers).slice(0, Math.min(3, wrongAnswers.length));
+    options = shuffle([...wrongOptions, correct]);
 
-      renderOptions();
-      updateProgressUI();
-    }
+    renderOptions();
+    updateProgressUI();
+  }
 
-    function renderOptions() {
-      optionsListEl.innerHTML = "";
-      options.forEach(option => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "option-btn";
-        btn.dataset.value = option;
+  function renderOptions() {
+    optionsListEl.innerHTML = "";
+    options.forEach(option => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option-btn";
+      btn.dataset.value = option;
 
-        const labelSpan = document.createElement("span");
-        labelSpan.className = "label";
-        labelSpan.textContent = option;
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "label";
+      labelSpan.textContent = option;
 
-        const iconSpan = document.createElement("span");
-        iconSpan.className = "icon";
+      const iconSpan = document.createElement("span");
+      iconSpan.className = "icon";
 
-        btn.appendChild(labelSpan);
-        btn.appendChild(iconSpan);
+      btn.appendChild(labelSpan);
+      btn.appendChild(iconSpan);
 
-        btn.addEventListener("click", () => {
-          if (answerChecked) return; // lock after checking
-          selectedAnswer = option;
-          refreshOptionStates();
-        });
-
-        optionsListEl.appendChild(btn);
+      btn.addEventListener("click", () => {
+        if (answerChecked) return;
+        selectedAnswer = option;
+        refreshOptionStates();
       });
 
-      refreshOptionStates();
-    }
+      optionsListEl.appendChild(btn);
+    });
 
-    function refreshOptionStates() {
-      const buttons = Array.from(optionsListEl.querySelectorAll(".option-btn"));
-      buttons.forEach(btn => {
-        const value = btn.dataset.value;
-        btn.classList.remove("option-btn--selected", "option-btn--correct", "option-btn--wrong");
-        btn.querySelector(".icon").textContent = "";
+    refreshOptionStates();
+  }
 
-        if (!answerChecked) {
-          if (value === selectedAnswer) {
-            btn.classList.add("option-btn--selected");
-          }
-        } else {
-          if (value === currentWord.english) {
-            btn.classList.add("option-btn--correct");
-            btn.querySelector(".icon").textContent = "✔";
-          } else if (value === selectedAnswer) {
-            btn.classList.add("option-btn--wrong");
-            btn.querySelector(".icon").textContent = "✖";
-          }
+  function refreshOptionStates() {
+    const buttons = Array.from(optionsListEl.querySelectorAll(".option-btn"));
+    buttons.forEach(btn => {
+      const value = btn.dataset.value;
+      btn.classList.remove("option-btn--selected", "option-btn--correct", "option-btn--wrong");
+      btn.querySelector(".icon").textContent = "";
+
+      if (!answerChecked) {
+        if (value === selectedAnswer) btn.classList.add("option-btn--selected");
+      } else {
+        if (value === currentWord.english) {
+          btn.classList.add("option-btn--correct");
+          btn.querySelector(".icon").textContent = "✔";
+        } else if (value === selectedAnswer) {
+          btn.classList.add("option-btn--wrong");
+          btn.querySelector(".icon").textContent = "✖";
         }
+      }
+    });
+  }
+
+  function showAlert(correct) {
+    alertCardEl.classList.add("alert-card--visible");
+    if (correct) {
+      alertIconEl.textContent = "✔";
+      alertTitleEl.textContent = "Richtig! (Correct!)";
+      alertTextEl.innerHTML = "Great job!";
+      alertCardEl.style.background = "radial-gradient(circle at top left, #10281c 0, #101b16 45%, #0b1511 100%)";
+      alertCardEl.style.borderColor = "rgba(61,220,151,0.7)";
+    } else {
+      alertIconEl.textContent = "✖";
+      alertTitleEl.textContent = "Falsch! (Wrong!)";
+      alertTextEl.innerHTML = `The correct answer is: <strong>${currentWord.english}</strong>`;
+      alertCardEl.style.background = "radial-gradient(circle at top left, #3b1020 0, #1c1118 45%, #150b10 100%)";
+      alertCardEl.style.borderColor = "rgba(255,107,107,0.7)";
+    }
+  }
+
+  function hideAlert() {
+    alertCardEl.classList.remove("alert-card--visible");
+  }
+
+  function updateProgressUI() {
+    const totalAnswered = correctCount + wrongCount;
+    const accuracy = totalAnswered ? (correctCount / totalAnswered) * 100 : 0;
+    const wordsLeft = wordQueue.length;
+
+    statCorrectEl.textContent = correctCount;
+    statWrongEl.textContent = wrongCount;
+    statTotalEl.textContent = totalAnswered;
+    statAccuracyEl.textContent = accuracy.toFixed(0) + "%";
+    statRemainingEl.textContent = wordsLeft;
+
+    progressFillEl.style.width = totalAnswered ? Math.min(100, accuracy) + "%" : "0%";
+    progressSubtitleEl.textContent = totalAnswered
+      ? "Nice rhythm - keep going."
+      : "Answer your first question to begin.";
+  }
+
+  function updateMetaVisibility() {
+    const showPlural = showPluralEl.checked;
+    const showExample = showExampleEl.checked;
+
+    pluralTextEl.textContent = showPlural && currentWord.plural ? "Plural: " + currentWord.plural : "";
+    exampleTextEl.textContent = showExample && currentWord.example ? "Example: " + currentWord.example : "";
+  }
+
+  // ----- EVENT HANDLERS -----
+  showPluralEl.addEventListener("change", updateMetaVisibility);
+  showExampleEl.addEventListener("change", updateMetaVisibility);
+
+  checkBtnEl.addEventListener("click", () => {
+    if (answerChecked) return;
+    if (!selectedAnswer) {
+      progressSubtitleEl.textContent = "Please select an answer first.";
+      return;
+    }
+    answerChecked = true;
+    const correct = selectedAnswer === currentWord.english;
+    if (correct) correctCount += 1;
+    else wrongCount += 1;
+    refreshOptionStates();
+    showAlert(correct);
+    updateProgressUI();
+  });
+
+  nextBtnEl.addEventListener("click", () => {
+    setupNewQuestion();
+  });
+
+  // ----- LOAD CSV AND INIT -----
+  async function loadCSV() {
+    try {
+      const response = await fetch("vocab.csv");
+      const text = await response.text();
+      const lines = text.trim().split("\n");
+      // Remove header row
+      vocab = lines.slice(1).map(line => {
+        const [german, english, plural, example] = line.split(",");
+        return {
+          german: german.trim(),
+          english: english.trim(),
+          plural: plural ? plural.trim() : "",
+          example: example ? example.trim() : ""
+        };
       });
-    }
 
-    function showAlert(correct) {
-      alertCardEl.classList.add("alert-card--visible");
-      if (correct) {
-        alertIconEl.textContent = "✔";
-        alertTitleEl.textContent = "Richtig! (Correct!)";
-        alertTextEl.innerHTML = "Great job!";
-        alertCardEl.style.background = "radial-gradient(circle at top left, #10281c 0, #101b16 45%, #0b1511 100%)";
-        alertCardEl.style.borderColor = "rgba(61,220,151,0.7)";
-      } else {
-        alertIconEl.textContent = "✖";
-        alertTitleEl.textContent = "Falsch! (Wrong!)";
-        alertTextEl.innerHTML = `The correct answer is: <strong>${currentWord.english}</strong>`;
-        alertCardEl.style.background = "radial-gradient(circle at top left, #3b1020 0, #1c1118 45%, #150b10 100%)";
-        alertCardEl.style.borderColor = "rgba(255,107,107,0.7)";
-      }
-    }
-
-    function hideAlert() {
-      alertCardEl.classList.remove("alert-card--visible");
-    }
-
-    function updateProgressUI() {
-      const totalAnswered = correctCount + wrongCount;
-      const accuracy = totalAnswered ? (correctCount / totalAnswered) * 100 : 0;
-      const wordsLeft = wordQueue.length;
-
-      statCorrectEl.textContent = correctCount;
-      statWrongEl.textContent = wrongCount;
-      statTotalEl.textContent = totalAnswered;
-      statAccuracyEl.textContent = accuracy.toFixed(0) + "%";
-      statRemainingEl.textContent = wordsLeft;
-
-      progressFillEl.style.width = totalAnswered ? Math.min(100, accuracy) + "%" : "0%";
-      progressSubtitleEl.textContent = totalAnswered
-        ? "Nice rhythm - keep going."
-        : "Answer your first question to begin.";
-    }
-
-    function updateMetaVisibility() {
-      const showPlural = showPluralEl.checked;
-      const showExample = showExampleEl.checked;
-
-      if (showPlural && currentWord.plural) {
-        pluralTextEl.textContent = "Plural: " + currentWord.plural;
-      } else if (showPlural && !currentWord.plural) {
-        pluralTextEl.textContent = "Plural: not available for this word";
-      } else {
-        pluralTextEl.textContent = "";
-      }
-
-      if (showExample && currentWord.example) {
-        exampleTextEl.textContent = "Example: " + currentWord.example;
-      } else {
-        exampleTextEl.textContent = "";
-      }
-    }
-
-    // ----- EVENT HANDLERS -----
-    showPluralEl.addEventListener("change", updateMetaVisibility);
-    showExampleEl.addEventListener("change", updateMetaVisibility);
-
-    checkBtnEl.addEventListener("click", () => {
-      if (answerChecked) return;
-      if (!selectedAnswer) {
-        // simple inline "warning" via subtitle
-        progressSubtitleEl.textContent = "Please select an answer first.";
+      if (!vocab.length) {
+        alert("CSV loaded but no words found. Check formatting.");
         return;
       }
-      answerChecked = true;
-      const correct = selectedAnswer === currentWord.english;
-      if (correct) {
-        correctCount += 1;
-      } else {
-        wrongCount += 1;
-      }
-      refreshOptionStates();
-      showAlert(correct);
-      updateProgressUI();
-    });
 
-    nextBtnEl.addEventListener("click", () => {
       setupNewQuestion();
-    });
+    } catch (err) {
+      console.error("Error loading CSV:", err);
+      alert("Failed to load vocab.csv. Make sure it is in the same folder as index.html.");
+    }
+  }
 
-    // ----- INIT -----
-    setupNewQuestion();
-  </script>
+  loadCSV();
+</script>
 </body>
 </html>
