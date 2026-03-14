@@ -4,17 +4,9 @@
   <meta charset="UTF-8" />
   <title>Deutsch Trainer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,333 +15,95 @@
       display: flex;
       justify-content: center;
     }
-
-    .app-shell {
-      width: 100%;
-      max-width: 420px;
-      min-height: 100vh;
-      padding: 0.8rem 0.9rem 1.8rem;
-      position: relative;
-    }
-
-    .top-bar {
-      position: relative;
-      height: 52px;
-      margin-bottom: 0.65rem;
-      display: flex;
-      align-items: center;
-    }
+    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; padding: 0.8rem 0.9rem 1.8rem; position: relative; }
+    .top-bar { position: relative; height: 52px; margin-bottom: 0.65rem; display: flex; align-items: center; }
     .avatar-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      width: 40px; height: 40px; border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
       background: linear-gradient(135deg, rgba(79,140,255,0.95), rgba(61,220,151,0.75));
-      color: #0b0d12;
-      font-weight: 800;
-      font-size: 1rem;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-      margin-right: 0.4rem;
-      flex-shrink: 0;
+      color: #0b0d12; font-weight: 800; font-size: 1rem;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35); margin-right: 0.4rem; flex-shrink: 0;
     }
     .name-pill {
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
-      background: rgba(26,29,36,0.72);
-      border: 1px solid rgba(79,140,255,0.26);
-      color: #f5f7fa;
-      font-weight: 600;
-      font-size: 0.92rem;
+      padding: 0.35rem 0.85rem; border-radius: 999px;
+      background: rgba(26,29,36,0.72); border: 1px solid rgba(79,140,255,0.26);
+      color: #f5f7fa; font-weight: 600; font-size: 0.92rem;
       box-shadow: 0 10px 24px rgba(0,0,0,0.28);
     }
-
     .app-wrapper { margin-top: 0.1rem; }
-
     .app-header-card {
-      background: #12141d;
-      border-radius: 14px;
-      padding: 0.65rem 1.1rem;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-      border: 1px solid rgba(79,140,255,0.32);
-      margin-bottom: 0.85rem;
-      position: relative;
-      overflow: hidden;
+      background: #12141d; border-radius: 14px; padding: 0.65rem 1.1rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45); border: 1px solid rgba(79,140,255,0.32);
+      margin-bottom: 0.85rem; position: relative; overflow: hidden;
     }
     .app-header-card::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 38%;
-      height: 2px;
-      background: linear-gradient(90deg, #4f8cff, transparent);
+      content: ""; position: absolute; left: 0; bottom: 0;
+      width: 38%; height: 2px; background: linear-gradient(90deg, #4f8cff, transparent);
     }
-    .app-title {
-      font-size: 2.1rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      color: #f5f7fa;
-      margin-bottom: 0.15rem;
-      line-height: 1.1;
-    }
-    .app-subtitle {
-      font-size: 0.95rem;
-      color: #aab0bb;
-    }
-
+    .app-title { font-size: 2.1rem; font-weight: 700; letter-spacing: 0.03em; color: #f5f7fa; margin-bottom: 0.15rem; line-height: 1.1; }
+    .app-subtitle { font-size: 0.95rem; color: #aab0bb; }
     .vocab-card {
       background: linear-gradient(145deg, #0f172a, #020617);
-      padding: 1.5rem 1.4rem 1.2rem;
-      border-radius: 20px;
-      box-shadow: 0 16px 46px rgba(0,0,0,0.7);
-      width: 100%;
-      text-align: center;
-      border: 1px solid rgba(79,140,255,0.45);
-      margin-bottom: 0.85rem;
+      padding: 1.5rem 1.4rem 1.2rem; border-radius: 20px;
+      box-shadow: 0 16px 46px rgba(0,0,0,0.7); width: 100%; text-align: center;
+      border: 1px solid rgba(79,140,255,0.45); margin-bottom: 0.85rem;
     }
-    .german-word {
-      font-size: 3.0rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 0.5rem;
-    }
-
-    .meta-text {
-      font-size: 0.9rem;
-      color: #cdd2e0;
-      margin-top: 0.25rem;
-    }
-
-    .checkbox-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      align-items: flex-start;
-      margin-top: 0.6rem;
-    }
-    .checkbox-label {
-      display: inline-flex;
-      align-items: center;
-      font-size: 0.9rem;
-      color: #d3d7e3;
-      gap: 0.4rem;
-    }
-    .checkbox-label input {
-      width: 16px;
-      height: 16px;
-      border-radius: 3px;
-      border: 1px solid #4b5563;
-      background-color: transparent;
-      accent-color: #4f8cff;
-    }
-
-    .answer-label {
-      font-size: 1.1rem;
-      color: #e1e4ec;
-      margin-bottom: 0.6rem;
-      font-weight: 600;
-    }
-
-    .options-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      margin-bottom: 0.85rem;
-    }
-
+    .german-word { font-size: 3.0rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; }
+    .meta-text { font-size: 0.9rem; color: #cdd2e0; margin-top: 0.25rem; }
+    .checkbox-row { display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start; margin-top: 0.6rem; }
+    .checkbox-label { display: inline-flex; align-items: center; font-size: 0.9rem; color: #d3d7e3; gap: 0.4rem; }
+    .checkbox-label input { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #4b5563; background-color: transparent; accent-color: #4f8cff; }
+    .answer-label { font-size: 1.1rem; color: #e1e4ec; margin-bottom: 0.6rem; font-weight: 600; }
+    .options-list { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 0.85rem; }
     .option-btn {
-      border-radius: 12px;
-      border: 1px solid rgba(75,85,116,0.7);
-      background: #111522;
-      color: #f5f7fa;
-      font-size: 1.05rem;
-      font-weight: 500;
-      padding: 0.9rem 0.8rem;
-      text-align: left;
-      width: 100%;
-      outline: none;
-      cursor: pointer;
+      border-radius: 12px; border: 1px solid rgba(75,85,116,0.7);
+      background: #111522; color: #f5f7fa;
+      font-size: 1.05rem; font-weight: 500; padding: 0.9rem 0.8rem;
+      text-align: left; width: 100%; outline: none; cursor: pointer;
       box-shadow: 0 6px 18px rgba(0,0,0,0.55);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
       transition: transform 0.16s ease-out, box-shadow 0.16s ease-out, background 0.16s ease-out, border-color 0.16s ease-out;
     }
     .option-btn span.label { flex: 1; }
-    .option-btn span.icon {
-      margin-left: 0.6rem;
-      font-size: 1.1rem;
-    }
-    .option-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.7);
-      border-color: rgba(122,132,160,0.9);
-    }
-    .option-btn--correct {
-      background: #11241c;
-      border-color: #3ddc97;
-      color: #3ddc97;
-      box-shadow: 0 12px 26px rgba(61,220,151,0.35);
-    }
-    .option-btn--wrong {
-      background: #261119;
-      border-color: #ff6b6b;
-      color: #ffb3b3;
-      box-shadow: 0 12px 26px rgba(255,107,107,0.3);
-    }
-    .option-btn--selected {
-      background: #1f2933;
-      border-color: #5ecece;
-      box-shadow: 0 12px 28px rgba(94,206,206,0.45);
-    }
-
-    .actions-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      margin-top: 0.4rem;
-      margin-bottom: 0.85rem;
-    }
-    .btn-main,
-    .btn-secondary {
-      border-radius: 999px;
-      padding: 0.7rem 1.4rem;
-      font-size: 1rem;
-      font-weight: 500;
-      width: 100%;
-      border: none;
-      outline: none;
-      cursor: pointer;
+    .option-btn span.icon { margin-left: 0.6rem; font-size: 1.1rem; }
+    .option-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,0.7); border-color: rgba(122,132,160,0.9); }
+    .option-btn--correct { background: #11241c; border-color: #3ddc97; color: #3ddc97; box-shadow: 0 12px 26px rgba(61,220,151,0.35); }
+    .option-btn--wrong { background: #261119; border-color: #ff6b6b; color: #ffb3b3; box-shadow: 0 12px 26px rgba(255,107,107,0.3); }
+    .option-btn--selected { background: #1f2933; border-color: #5ecece; box-shadow: 0 12px 28px rgba(94,206,206,0.45); }
+    .actions-row { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.4rem; margin-bottom: 0.85rem; }
+    .btn-main, .btn-secondary {
+      border-radius: 999px; padding: 0.7rem 1.4rem;
+      font-size: 1rem; font-weight: 500; width: 100%;
+      border: none; outline: none; cursor: pointer;
       transition: transform 0.16s ease-out, box-shadow 0.16s ease-out, filter 0.16s ease-out;
     }
-    .btn-secondary {
-      background: linear-gradient(90deg, #2b67f6, #35a0ff);
-      color: white;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.7);
-    }
-    .btn-main {
-      background: linear-gradient(90deg, #9b3bff, #ff3ebf);
-      color: white;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
-    }
-    .btn-main:hover,
-    .btn-secondary:hover {
-      filter: brightness(1.07);
-      transform: translateY(-1px);
-    }
-
+    .btn-secondary { background: linear-gradient(90deg, #2b67f6, #35a0ff); color: white; box-shadow: 0 10px 24px rgba(0,0,0,0.7); }
+    .btn-main { background: linear-gradient(90deg, #9b3bff, #ff3ebf); color: white; box-shadow: 0 12px 30px rgba(0,0,0,0.8); }
+    .btn-main:hover, .btn-secondary:hover { filter: brightness(1.07); transform: translateY(-1px); }
     .alert-card {
-      margin-top: 0.4rem;
-      border-radius: 12px;
-      padding: 0.65rem 0.9rem 0.7rem;
+      margin-top: 0.4rem; border-radius: 12px; padding: 0.65rem 0.9rem 0.7rem;
       background: radial-gradient(circle at top left, #3b1020 0, #1c1118 45%, #150b10 100%);
-      border: 1px solid rgba(255,107,107,0.7);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.65);
-      color: #ffd4d4;
-      display: none;
-      flex-direction: column;
-      gap: 0.15rem;
-      font-size: 0.98rem;
+      border: 1px solid rgba(255,107,107,0.7); box-shadow: 0 10px 24px rgba(0,0,0,0.65);
+      color: #ffd4d4; display: none; flex-direction: column; gap: 0.15rem; font-size: 0.98rem;
     }
     .alert-card--visible { display: flex; }
-    .alert-title {
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
+    .alert-title { font-weight: 600; display: flex; align-items: center; gap: 0.35rem; }
     .alert-title span.icon { font-size: 1.15rem; }
     .alert-text { font-size: 0.9rem; }
-
-    .progress-card {
-      margin-top: 1rem;
-      background: #151822;
-      border-radius: 16px;
-      padding: 1.0rem 1.1rem 1.1rem;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.75);
-      border: 1px solid rgba(61,72,102,0.7);
-    }
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 0.5rem;
-    }
-    .progress-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #f5f7fa;
-    }
-    .progress-subtitle {
-      font-size: 0.9rem;
-      color: #8f95a3;
-    }
-    .progress-bar {
-      position: relative;
-      width: 100%;
-      height: 6px;
-      border-radius: 999px;
-      background-color: #202636;
-      overflow: hidden;
-      margin-bottom: 0.7rem;
-      margin-top: 0.1rem;
-    }
-    .progress-bar-fill {
-      position: absolute;
-      inset: 0;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #4f8cff, #3ddc97);
-      transition: width 0.25s ease-out;
-    }
-    .stat-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem 0.35rem;
-    }
-    .stat-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.16rem 0.65rem;
-      border-radius: 999px;
-      background: #202431;
-      font-size: 0.82rem;
-      color: #d0d4e2;
-      border: 1px solid rgba(75,85,116,0.9);
-    }
-    .stat-pill--correct {
-      background: #14291f;
-      border-color: rgba(61,220,151,0.7);
-      color: #a9f0cd;
-    }
-    .stat-pill--wrong {
-      background: #2a181c;
-      border-color: rgba(255,107,107,0.72);
-      color: #ffc0c0;
-    }
-    .stat-pill--total {
-      background: #202534;
-      border-color: rgba(122,132,160,0.9);
-      color: #e0e4f3;
-    }
-    .stat-pill--remaining {
-      background: #1c2030;
-      border-color: rgba(79,140,255,0.6);
-      color: #b8caff;
-    }
-    .tip-box {
-      margin-top: 0.6rem;
-      font-size: 0.8rem;
-      color: #8b92a0;
-    }
-
-    @media (max-width: 480px) {
-      .app-title { font-size: 1.9rem; }
-      .german-word { font-size: 2.4rem; }
-    }
+    .progress-card { margin-top: 1rem; background: #151822; border-radius: 16px; padding: 1.0rem 1.1rem 1.1rem; box-shadow: 0 18px 40px rgba(0,0,0,0.75); border: 1px solid rgba(61,72,102,0.7); }
+    .progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+    .progress-title { font-size: 1.1rem; font-weight: 600; color: #f5f7fa; }
+    .progress-subtitle { font-size: 0.9rem; color: #8f95a3; }
+    .progress-bar { position: relative; width: 100%; height: 6px; border-radius: 999px; background-color: #202636; overflow: hidden; margin-bottom: 0.7rem; margin-top: 0.1rem; }
+    .progress-bar-fill { position: absolute; inset: 0; width: 0%; border-radius: 999px; background: linear-gradient(90deg, #4f8cff, #3ddc97); transition: width 0.25s ease-out; }
+    .stat-row { display: flex; flex-wrap: wrap; gap: 0.4rem 0.35rem; }
+    .stat-pill { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.16rem 0.65rem; border-radius: 999px; background: #202431; font-size: 0.82rem; color: #d0d4e2; border: 1px solid rgba(75,85,116,0.9); }
+    .stat-pill--correct { background: #14291f; border-color: rgba(61,220,151,0.7); color: #a9f0cd; }
+    .stat-pill--wrong { background: #2a181c; border-color: rgba(255,107,107,0.72); color: #ffc0c0; }
+    .stat-pill--total { background: #202534; border-color: rgba(122,132,160,0.9); color: #e0e4f3; }
+    .stat-pill--remaining { background: #1c2030; border-color: rgba(79,140,255,0.6); color: #b8caff; }
+    .tip-box { margin-top: 0.6rem; font-size: 0.8rem; color: #8b92a0; }
+    @media (max-width: 480px) { .app-title { font-size: 1.9rem; } .german-word { font-size: 2.4rem; } }
   </style>
 </head>
 <body>
@@ -358,58 +112,36 @@
       <div class="avatar-circle">HN</div>
       <div class="name-pill">Haidar Neda</div>
     </div>
-
     <div class="app-wrapper">
       <div class="app-header-card">
         <div class="app-title">Deutsch Trainer</div>
         <div class="app-subtitle">Master German vocabulary with confidence</div>
       </div>
-
       <div class="vocab-card">
-        <div class="german-word" id="germanWord">Haus</div>
+        <div class="german-word" id="germanWord">—</div>
         <div class="meta-text" id="pluralText"></div>
         <div class="meta-text" id="exampleText"></div>
         <div class="checkbox-row">
-          <label class="checkbox-label">
-            <input type="checkbox" id="showPlural" />
-            <span>Show plural</span>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="showExample" />
-            <span>Show example</span>
-          </label>
+          <label class="checkbox-label"><input type="checkbox" id="showPlural" /><span>Show plural</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="showExample" /><span>Show example</span></label>
         </div>
       </div>
-
       <div class="answer-label">Select the correct English meaning:</div>
-
-      <div class="options-list" id="optionsList">
-        <!-- Option buttons injected here -->
-      </div>
-
+      <div class="options-list" id="optionsList"></div>
       <div class="actions-row">
         <button class="btn-secondary" type="button" id="checkBtn">Check Answer</button>
         <button class="btn-main" type="button" id="nextBtn">Next Word</button>
       </div>
-
       <div class="alert-card" id="alertCard">
-        <div class="alert-title">
-          <span class="icon" id="alertIcon">✖</span>
-          <span id="alertTitle">Falsch! (Wrong!)</span>
-        </div>
+        <div class="alert-title"><span class="icon" id="alertIcon">✖</span><span id="alertTitle">Falsch! (Wrong!)</span></div>
         <div class="alert-text" id="alertText">The correct answer is: <strong>house</strong></div>
       </div>
-
       <div class="progress-card">
         <div class="progress-header">
           <div class="progress-title">Your Progress</div>
           <div class="progress-subtitle" id="progressSubtitle">Answer your first question to begin.</div>
         </div>
-
-        <div class="progress-bar">
-          <div class="progress-bar-fill" id="progressFill"></div>
-        </div>
-
+        <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
         <div class="stat-row">
           <div class="stat-pill stat-pill--correct">✓ Correct: <strong id="statCorrect">0</strong></div>
           <div class="stat-pill stat-pill--wrong">✗ Wrong: <strong id="statWrong">0</strong></div>
@@ -417,51 +149,41 @@
           <div class="stat-pill">Accuracy: <strong id="statAccuracy">0%</strong></div>
           <div class="stat-pill stat-pill--remaining">Remaining: <strong id="statRemaining">0</strong></div>
         </div>
-
-        <div class="tip-box">
-          You can extend your deck at any time by editing the vocabulary list in the code.
-        </div>
+        <div class="tip-box">Add new words anytime by editing vocab.csv and redeploying.</div>
       </div>
     </div>
   </div>
 
 <script>
-  // ----- STATE -----
   let vocab = [];
   let wordQueue = [];
   let currentWord = null;
   let options = [];
   let selectedAnswer = null;
   let answerChecked = false;
-
   let correctCount = 0;
   let wrongCount = 0;
 
-  // ----- DOM ELEMENTS -----
-  const germanWordEl = document.getElementById("germanWord");
-  const pluralTextEl = document.getElementById("pluralText");
-  const exampleTextEl = document.getElementById("exampleText");
-  const showPluralEl = document.getElementById("showPlural");
-  const showExampleEl = document.getElementById("showExample");
-
-  const optionsListEl = document.getElementById("optionsList");
-  const checkBtnEl = document.getElementById("checkBtn");
-  const nextBtnEl = document.getElementById("nextBtn");
-
-  const alertCardEl = document.getElementById("alertCard");
-  const alertIconEl = document.getElementById("alertIcon");
-  const alertTitleEl = document.getElementById("alertTitle");
-  const alertTextEl = document.getElementById("alertText");
-
-  const progressSubtitleEl = document.getElementById("progressSubtitle");
-  const progressFillEl = document.getElementById("progressFill");
-  const statCorrectEl = document.getElementById("statCorrect");
-  const statWrongEl = document.getElementById("statWrong");
-  const statTotalEl = document.getElementById("statTotal");
-  const statAccuracyEl = document.getElementById("statAccuracy");
+  const germanWordEl    = document.getElementById("germanWord");
+  const pluralTextEl    = document.getElementById("pluralText");
+  const exampleTextEl   = document.getElementById("exampleText");
+  const showPluralEl    = document.getElementById("showPlural");
+  const showExampleEl   = document.getElementById("showExample");
+  const optionsListEl   = document.getElementById("optionsList");
+  const checkBtnEl      = document.getElementById("checkBtn");
+  const nextBtnEl       = document.getElementById("nextBtn");
+  const alertCardEl     = document.getElementById("alertCard");
+  const alertIconEl     = document.getElementById("alertIcon");
+  const alertTitleEl    = document.getElementById("alertTitle");
+  const alertTextEl     = document.getElementById("alertText");
+  const progressSubEl   = document.getElementById("progressSubtitle");
+  const progressFillEl  = document.getElementById("progressFill");
+  const statCorrectEl   = document.getElementById("statCorrect");
+  const statWrongEl     = document.getElementById("statWrong");
+  const statTotalEl     = document.getElementById("statTotal");
+  const statAccuracyEl  = document.getElementById("statAccuracy");
   const statRemainingEl = document.getElementById("statRemaining");
 
-  // ----- HELPERS -----
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -471,30 +193,20 @@
     return a;
   }
 
-  function setupNewRoundIfNeeded() {
+  function setupNewQuestion() {
     if (!wordQueue.length) {
       wordQueue = shuffle(vocab);
-      progressSubtitleEl.textContent = "New round started. Keep going!";
+      if (currentWord) progressSubEl.textContent = "New round! Keep going.";
     }
-  }
-
-  function setupNewQuestion() {
-    setupNewRoundIfNeeded();
     currentWord = wordQueue.pop();
     selectedAnswer = null;
     answerChecked = false;
     hideAlert();
-
     germanWordEl.textContent = currentWord.german;
     updateMetaVisibility();
-
     const correct = currentWord.english;
-    const wrongAnswers = vocab
-      .filter(w => w.english !== correct)
-      .map(w => w.english);
-    const wrongOptions = shuffle(wrongAnswers).slice(0, Math.min(3, wrongAnswers.length));
-    options = shuffle([...wrongOptions, correct]);
-
+    const wrongs = shuffle(vocab.filter(w => w.english !== correct)).slice(0, 3).map(w => w.english);
+    options = shuffle([...wrongs, correct]);
     renderOptions();
     updateProgressUI();
   }
@@ -506,36 +218,28 @@
       btn.type = "button";
       btn.className = "option-btn";
       btn.dataset.value = option;
-
       const labelSpan = document.createElement("span");
       labelSpan.className = "label";
       labelSpan.textContent = option;
-
       const iconSpan = document.createElement("span");
       iconSpan.className = "icon";
-
       btn.appendChild(labelSpan);
       btn.appendChild(iconSpan);
-
       btn.addEventListener("click", () => {
         if (answerChecked) return;
         selectedAnswer = option;
         refreshOptionStates();
       });
-
       optionsListEl.appendChild(btn);
     });
-
     refreshOptionStates();
   }
 
   function refreshOptionStates() {
-    const buttons = Array.from(optionsListEl.querySelectorAll(".option-btn"));
-    buttons.forEach(btn => {
+    Array.from(optionsListEl.querySelectorAll(".option-btn")).forEach(btn => {
       const value = btn.dataset.value;
       btn.classList.remove("option-btn--selected", "option-btn--correct", "option-btn--wrong");
       btn.querySelector(".icon").textContent = "";
-
       if (!answerChecked) {
         if (value === selectedAnswer) btn.classList.add("option-btn--selected");
       } else {
@@ -558,97 +262,78 @@
       alertTextEl.innerHTML = "Great job!";
       alertCardEl.style.background = "radial-gradient(circle at top left, #10281c 0, #101b16 45%, #0b1511 100%)";
       alertCardEl.style.borderColor = "rgba(61,220,151,0.7)";
+      alertCardEl.style.color = "#c9f6e3";
     } else {
       alertIconEl.textContent = "✖";
       alertTitleEl.textContent = "Falsch! (Wrong!)";
-      alertTextEl.innerHTML = `The correct answer is: <strong>${currentWord.english}</strong>`;
+      alertTextEl.innerHTML = "The correct answer is: <strong>" + currentWord.english + "</strong>";
       alertCardEl.style.background = "radial-gradient(circle at top left, #3b1020 0, #1c1118 45%, #150b10 100%)";
       alertCardEl.style.borderColor = "rgba(255,107,107,0.7)";
+      alertCardEl.style.color = "#ffd4d4";
     }
   }
 
-  function hideAlert() {
-    alertCardEl.classList.remove("alert-card--visible");
-  }
+  function hideAlert() { alertCardEl.classList.remove("alert-card--visible"); }
 
   function updateProgressUI() {
-    const totalAnswered = correctCount + wrongCount;
-    const accuracy = totalAnswered ? (correctCount / totalAnswered) * 100 : 0;
-    const wordsLeft = wordQueue.length;
-
+    const total = correctCount + wrongCount;
+    const accuracy = total ? (correctCount / total) * 100 : 0;
     statCorrectEl.textContent = correctCount;
     statWrongEl.textContent = wrongCount;
-    statTotalEl.textContent = totalAnswered;
+    statTotalEl.textContent = total;
     statAccuracyEl.textContent = accuracy.toFixed(0) + "%";
-    statRemainingEl.textContent = wordsLeft;
-
-    progressFillEl.style.width = totalAnswered ? Math.min(100, accuracy) + "%" : "0%";
-    progressSubtitleEl.textContent = totalAnswered
-      ? "Nice rhythm - keep going."
-      : "Answer your first question to begin.";
+    statRemainingEl.textContent = wordQueue.length;
+    progressFillEl.style.width = total ? Math.min(100, accuracy) + "%" : "0%";
+    progressSubEl.textContent = total ? "Nice rhythm - keep going." : "Answer your first question to begin.";
   }
 
   function updateMetaVisibility() {
-    const showPlural = showPluralEl.checked;
-    const showExample = showExampleEl.checked;
-
-    pluralTextEl.textContent = showPlural && currentWord.plural ? "Plural: " + currentWord.plural : "";
-    exampleTextEl.textContent = showExample && currentWord.example ? "Example: " + currentWord.example : "";
+    pluralTextEl.textContent = showPluralEl.checked && currentWord.plural ? "Plural: " + currentWord.plural : "";
+    exampleTextEl.textContent = showExampleEl.checked && currentWord.example ? "Example: " + currentWord.example : "";
   }
 
-  // ----- EVENT HANDLERS -----
   showPluralEl.addEventListener("change", updateMetaVisibility);
   showExampleEl.addEventListener("change", updateMetaVisibility);
 
   checkBtnEl.addEventListener("click", () => {
     if (answerChecked) return;
-    if (!selectedAnswer) {
-      progressSubtitleEl.textContent = "Please select an answer first.";
-      return;
-    }
+    if (!selectedAnswer) { progressSubEl.textContent = "Please select an answer first."; return; }
     answerChecked = true;
     const correct = selectedAnswer === currentWord.english;
-    if (correct) correctCount += 1;
-    else wrongCount += 1;
+    if (correct) correctCount++; else wrongCount++;
     refreshOptionStates();
     showAlert(correct);
     updateProgressUI();
   });
 
-  nextBtnEl.addEventListener("click", () => {
-    setupNewQuestion();
-  });
+  nextBtnEl.addEventListener("click", setupNewQuestion);
 
-  // ----- LOAD CSV AND INIT -----
-  async function loadCSV() {
-    try {
-      const response = await fetch("vocab.csv");
-      const text = await response.text();
-      const lines = text.trim().split("\n");
-      // Remove header row
-      vocab = lines.slice(1).map(line => {
-        const [german, english, plural, example] = line.split(",");
-        return {
-          german: german.trim(),
-          english: english.trim(),
-          plural: plural ? plural.trim() : "",
-          example: example ? example.trim() : ""
-        };
-      });
+  // Load vocab.csv — semicolon-delimited, no header row
+  fetch("vocab.csv")
+    .then(r => { if (!r.ok) throw new Error("not found"); return r.text(); })
+    .then(text => {
+      vocab = text.trim().split("\n")
+        .map(line => {
+          const [german, english, plural, example] = line.split(";");
+          return {
+            german:  (german  || "").trim(),
+            english: (english || "").trim(),
+            plural:  (plural  || "").trim(),
+            example: (example || "").trim()
+          };
+        })
+        .filter(w => w.german && w.english);
 
       if (!vocab.length) {
-        alert("CSV loaded but no words found. Check formatting.");
+        alert("vocab.csv loaded but no words found. Check that it uses semicolons (;) as separators.");
         return;
       }
-
       setupNewQuestion();
-    } catch (err) {
-      console.error("Error loading CSV:", err);
-      alert("Failed to load vocab.csv. Make sure it is in the same folder as index.html.");
-    }
-  }
-
-  loadCSV();
+    })
+    .catch(() => {
+      germanWordEl.textContent = "Error";
+      optionsListEl.innerHTML = '<p style="color:#ff6b6b">Could not load vocab.csv — make sure it is in the same folder as index.html.</p>';
+    });
 </script>
 </body>
 </html>
