@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Deutsch Trainer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
@@ -103,6 +103,14 @@
     .stat-pill--total { background: #202534; border-color: rgba(122,132,160,0.9); color: #e0e4f3; }
     .stat-pill--remaining { background: #1c2030; border-color: rgba(79,140,255,0.6); color: #b8caff; }
     .tip-box { margin-top: 0.6rem; font-size: 0.8rem; color: #8b92a0; }
+    [hidden] {display:none!important}
+    .voice-row {display:flex;align-items:center;justify-content:center;gap:.65rem;flex-wrap:wrap}
+    .voice-btn {background:#17344e;color:#e5f4ff;border:1px solid #547595;border-radius:1.5rem;padding:.55rem .95rem;min-height:44px;cursor:pointer}
+    button:focus-visible {outline:2px solid #f5c773;outline-offset:3px}
+    button:disabled {cursor:default}
+    .btn-secondary:disabled {opacity:.55}
+    #summary h2 {margin-bottom:.45rem}
+    .german-word {overflow-wrap:anywhere}
     @media (max-width: 480px) { .app-title { font-size: 1.9rem; } .german-word { font-size: 2.4rem; } }
   </style>
 </head>
@@ -117,8 +125,14 @@
         <div class="app-title">Deutsch Trainer</div>
         <div class="app-subtitle">Master German vocabulary with confidence</div>
       </div>
+      <section id="practice">
       <div class="vocab-card">
-        <div class="german-word" id="germanWord">—</div>
+        <div class="german-word" id="germanWord" lang="de">…</div>
+        <div class="voice-row">
+          <button class="voice-btn" id="listen" type="button" disabled>🔊 Hear the word</button>
+          <label class="checkbox-label"><input id="slow" type="checkbox">Slow</label>
+        </div>
+        <p class="meta-text" role="status" id="voiceStatus"></p>
         <div class="meta-text" id="pluralText"></div>
         <div class="meta-text" id="exampleText"></div>
         <div class="checkbox-row">
@@ -129,13 +143,22 @@
       <div class="answer-label">Select the correct English meaning:</div>
       <div class="options-list" id="optionsList"></div>
       <div class="actions-row">
-        <button class="btn-secondary" type="button" id="checkBtn">Check Answer</button>
-        <button class="btn-main" type="button" id="nextBtn">Next Word</button>
+        <button class="btn-secondary" type="button" id="checkBtn" disabled>Check Answer</button>
+        <button class="btn-main" type="button" id="nextBtn" disabled>Next Word</button>
       </div>
       <div class="alert-card" id="alertCard">
         <div class="alert-title"><span class="icon" id="alertIcon">✖</span><span id="alertTitle">Falsch! (Wrong!)</span></div>
         <div class="alert-text" id="alertText">The correct answer is: <strong>house</strong></div>
       </div>
+      </section>
+      <section class="vocab-card" id="summary" hidden>
+        <h2 tabindex="-1" id="summaryTitle">Round complete</h2>
+        <p id="roundStats"></p>
+        <div class="actions-row">
+          <button class="btn-secondary" id="review" type="button">Practice missed words</button>
+          <button class="btn-main" id="restart" type="button">Start a full round</button>
+        </div>
+      </section>
       <div class="progress-card">
         <div class="progress-header">
           <div class="progress-title">Your Progress</div>
@@ -193,11 +216,59 @@
     return a;
   }
 
-  function setupNewQuestion() {
-    if (!wordQueue.length) {
-      wordQueue = shuffle(vocab);
-      if (currentWord) progressSubEl.textContent = "New round! Keep going.";
+  const byId = id => document.getElementById(id);
+  let missed = [];
+  let skipped = 0;
+  let roundSize = 0;
+  let reviewRound = false;
+  const synth = window.speechSynthesis;
+  let activeSpeech = null;
+
+  function stopSpeech() {
+    activeSpeech = null;
+    if (synth) synth.cancel();
+    byId("voiceStatus").textContent = "";
+  }
+
+  byId("listen").addEventListener("click", () => {
+    if (!currentWord) return;
+    stopSpeech();
+    if (!synth || !window.SpeechSynthesisUtterance) {
+      byId("voiceStatus").textContent = "This browser does not support speech playback.";
+      return;
     }
+    const speech = new SpeechSynthesisUtterance(currentWord.german);
+    activeSpeech = speech;
+    const voices = synth.getVoices();
+    const germanVoice = voices.find(v => /^de[-_]DE$/i.test(v.lang)) ||
+                        voices.find(v => /^de(?:[-_]|$)/i.test(v.lang));
+    if (germanVoice) speech.voice = germanVoice;
+    speech.lang = "de-DE";
+    speech.rate = byId("slow").checked ? 0.7 : 1;
+    speech.onerror = () => {
+      if (activeSpeech === speech) byId("voiceStatus").textContent =
+        "German audio is unavailable. Check your device’s German text-to-speech voice and try again.";
+    };
+    synth.speak(speech);
+  });
+  if (synth) synth.getVoices();
+  window.addEventListener("pagehide", stopSpeech);
+
+  function startRound(cards, review = false) {
+    wordQueue = shuffle(cards);
+    missed = [];
+    skipped = 0;
+    roundSize = cards.length;
+    reviewRound = review;
+    byId("practice").hidden = false;
+    byId("summary").hidden = true;
+    setupNewQuestion();
+  }
+
+  function setupNewQuestion() {
+    stopSpeech();
+    byId("listen").disabled = false;
+    nextBtnEl.disabled = false;
     currentWord = wordQueue.pop();
     selectedAnswer = null;
     answerChecked = false;
@@ -205,7 +276,14 @@
     germanWordEl.textContent = currentWord.german;
     updateMetaVisibility();
     const correct = currentWord.english;
-    const wrongs = shuffle(vocab.filter(w => w.english !== correct)).slice(0, 3).map(w => w.english);
+    const normalize = text => text.trim().toLowerCase();
+    const excluded = new Set(vocab.filter(w => w.german === currentWord.german).map(w => normalize(w.english)));
+    const unique = new Map();
+    for (const word of vocab) {
+      const key = normalize(word.english);
+      if (!excluded.has(key)) unique.set(key, word.english);
+    }
+    const wrongs = shuffle([...unique.values()]).slice(0, 3);
     options = shuffle([...wrongs, correct]);
     renderOptions();
     updateProgressUI();
@@ -236,7 +314,12 @@
   }
 
   function refreshOptionStates() {
+    checkBtnEl.disabled = answerChecked || selectedAnswer === null;
+    nextBtnEl.textContent = answerChecked
+      ? (wordQueue.length ? "Next word" : "Finish round")
+      : (wordQueue.length ? "Skip word" : "Skip and finish");
     Array.from(optionsListEl.querySelectorAll(".option-btn")).forEach(btn => {
+      btn.disabled = answerChecked;
       const value = btn.dataset.value;
       btn.classList.remove("option-btn--selected", "option-btn--correct", "option-btn--wrong");
       btn.querySelector(".icon").textContent = "";
@@ -266,7 +349,7 @@
     } else {
       alertIconEl.textContent = "✖";
       alertTitleEl.textContent = "Falsch! (Wrong!)";
-      alertTextEl.innerHTML = "The correct answer is: <strong>" + currentWord.english + "</strong>";
+      alertTextEl.textContent = "The correct answer is " + currentWord.english + ".";
       alertCardEl.style.background = "radial-gradient(circle at top left, #3b1020 0, #1c1118 45%, #150b10 100%)";
       alertCardEl.style.borderColor = "rgba(255,107,107,0.7)";
       alertCardEl.style.color = "#ffd4d4";
@@ -282,9 +365,11 @@
     statWrongEl.textContent = wrongCount;
     statTotalEl.textContent = total;
     statAccuracyEl.textContent = accuracy.toFixed(0) + "%";
-    statRemainingEl.textContent = wordQueue.length;
-    progressFillEl.style.width = total ? Math.min(100, accuracy) + "%" : "0%";
-    progressSubEl.textContent = total ? "Nice rhythm - keep going." : "Answer your first question to begin.";
+    const remaining = wordQueue.length + Number(Boolean(currentWord) && !answerChecked);
+    const done = roundSize - remaining;
+    statRemainingEl.textContent = remaining;
+    progressFillEl.style.width = (100 * done / roundSize) + "%";
+    progressSubEl.textContent = (reviewRound ? "Review" : "Round") + " · " + done + " / " + roundSize;
   }
 
   function updateMetaVisibility() {
@@ -300,13 +385,40 @@
     if (!selectedAnswer) { progressSubEl.textContent = "Please select an answer first."; return; }
     answerChecked = true;
     const correct = selectedAnswer === currentWord.english;
-    if (correct) correctCount++; else wrongCount++;
+    if (correct) correctCount++;
+    else {
+      wrongCount++;
+      missed.push(currentWord);
+    }
     refreshOptionStates();
     showAlert(correct);
     updateProgressUI();
   });
 
-  nextBtnEl.addEventListener("click", setupNewQuestion);
+  nextBtnEl.addEventListener("click", () => {
+    if (!currentWord) return;
+    if (!answerChecked) {
+      missed.push(currentWord);
+      skipped++;
+    }
+    if (wordQueue.length) {
+      setupNewQuestion();
+      return;
+    }
+    stopSpeech();
+    currentWord = null;
+    byId("practice").hidden = true;
+    byId("summary").hidden = false;
+    byId("summaryTitle").textContent = reviewRound ? "Review complete" : "Round complete";
+    byId("summaryTitle").focus();
+    byId("roundStats").textContent = "Correct: " + (roundSize - missed.length) +
+      " · Wrong: " + (missed.length - skipped) + " · Skipped: " + skipped;
+    byId("review").hidden = !missed.length;
+    byId("review").textContent = "Practice missed and skipped words (" + missed.length + ")";
+    updateProgressUI();
+  });
+  byId("review").addEventListener("click", () => startRound(missed, true));
+  byId("restart").addEventListener("click", () => startRound(vocab));
 
   // Load vocab.csv — semicolon-delimited, no header row
   fetch("vocab.csv")
@@ -329,7 +441,7 @@
         alert("vocab.csv loaded but no words found. Check that it uses semicolons (;) as separators.");
         return;
       }
-      setupNewQuestion();
+      startRound(vocab);
     })
     .catch(() => {
       germanWordEl.textContent = "Error";
