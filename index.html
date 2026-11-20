@@ -177,6 +177,7 @@
     </div>
   </div>
 
+<script defer src="pronunciations.js"></script>
 <script>
   let vocab = [];
   let wordQueue = [];
@@ -223,16 +224,19 @@
   let reviewRound = false;
   const synth = window.speechSynthesis;
   let activeSpeech = null;
+  let activeAudio = null;
 
   function stopSpeech() {
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio = null;
+    }
     activeSpeech = null;
     if (synth) synth.cancel();
     byId("voiceStatus").textContent = "";
   }
 
-  byId("listen").addEventListener("click", () => {
-    if (!currentWord) return;
-    stopSpeech();
+  function speakWithDevice() {
     if (!synth || !window.SpeechSynthesisUtterance) {
       byId("voiceStatus").textContent = "This browser does not support speech playback.";
       return;
@@ -250,6 +254,35 @@
         "German audio is unavailable. Check your device’s German text-to-speech voice and try again.";
     };
     synth.speak(speech);
+  }
+
+  byId("listen").addEventListener("click", () => {
+    if (!currentWord) return;
+    stopSpeech();
+    const recording = window.germanPronunciations?.[currentWord.german];
+    if (typeof recording !== "string") {
+      speakWithDevice();
+      return;
+    }
+    const audio = new Audio("data:audio/mpeg;base64," + recording);
+    activeAudio = audio;
+    audio.playbackRate = byId("slow").checked ? 0.75 : 1;
+    audio.preservesPitch = true;
+    audio.onplaying = () => {
+      if (activeAudio === audio) byId("voiceStatus").textContent = "Playing German audio…";
+    };
+    audio.onended = () => {
+      if (activeAudio === audio) {
+        activeAudio = null;
+        byId("voiceStatus").textContent = "";
+      }
+    };
+    audio.play().catch(() => {
+      if (activeAudio === audio) {
+        activeAudio = null;
+        speakWithDevice();
+      }
+    });
   });
   if (synth) synth.getVoices();
   window.addEventListener("pagehide", stopSpeech);
