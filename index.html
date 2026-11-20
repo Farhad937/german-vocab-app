@@ -103,6 +103,15 @@
     .stat-pill--total { background: #202534; border-color: rgba(122,132,160,0.9); color: #e0e4f3; }
     .stat-pill--remaining { background: #1c2030; border-color: rgba(79,140,255,0.6); color: #b8caff; }
     .tip-box { margin-top: 0.6rem; font-size: 0.8rem; color: #8b92a0; }
+    .word-editor {background:#151822;border:1px solid #3a485e;border-radius:14px;margin-bottom:.85rem}
+    .word-editor summary {cursor:pointer;padding:.85rem 1rem;font-weight:600;color:#d7e7ff}
+    .word-editor summary:focus-visible {outline:2px solid #f5c773;border-radius:14px}
+    .word-editor form {display:grid;gap:.8rem;padding:0 1rem 1rem}
+    .word-editor label {display:grid;gap:.28rem;color:#dae1ef;font-size:.93rem}
+    .word-editor input {font:inherit;font-size:1rem;width:100%;background:#0f1420;color:#f5f7fa;border:1px solid #536078;border-radius:8px;padding:.66rem}
+    .word-editor input:focus-visible {outline:2px solid #83b1ff}
+    .word-editor .note {font-size:.85rem;color:#b6c1d0}
+    #saveStatus:empty {display:none}
     [hidden] {display:none!important}
     .voice-row {display:flex;align-items:center;justify-content:center;gap:.65rem;flex-wrap:wrap}
     .voice-btn {background:#17344e;color:#e5f4ff;border:1px solid #547595;border-radius:1.5rem;padding:.55rem .95rem;min-height:44px;cursor:pointer}
@@ -125,6 +134,18 @@
         <div class="app-title">Deutsch Trainer</div>
         <div class="app-subtitle">Master German vocabulary with confidence</div>
       </div>
+      <details class="word-editor" id="wordEditor">
+        <summary>Add a word</summary>
+        <form id="addWordForm">
+          <p class="note">New words are saved in this browser on this device.</p>
+          <label>German word or phrase<input id="newGerman" lang="de" required maxlength="180" placeholder="der Schlüssel"></label>
+          <label>English meaning<input id="newEnglish" lang="en" required maxlength="260" placeholder="key"></label>
+          <label>Plural (optional)<input id="newPlural" lang="de" maxlength="180" placeholder="die Schlüssel"></label>
+          <label>Example sentence (optional)<input id="newExample" lang="de" maxlength="500" placeholder="Wo ist mein Schlüssel?"></label>
+          <button class="btn-secondary" type="submit" id="saveWord" disabled>Save word</button>
+          <p class="note" id="saveStatus" role="status"></p>
+        </form>
+      </details>
       <section id="practice">
       <div class="vocab-card">
         <div class="german-word" id="germanWord" lang="de">…</div>
@@ -172,7 +193,6 @@
           <div class="stat-pill">Accuracy: <strong id="statAccuracy">0%</strong></div>
           <div class="stat-pill stat-pill--remaining">Remaining: <strong id="statRemaining">0</strong></div>
         </div>
-        <div class="tip-box">Add new words anytime by editing vocab.csv and redeploying.</div>
       </div>
     </div>
   </div>
@@ -287,6 +307,76 @@
   if (synth) synth.getVoices();
   window.addEventListener("pagehide", stopSpeech);
 
+  const wordPrefix = "deutsch-trainer.word.v1.";
+  const normalizeWord = text => text.normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+  const wordKey = word => wordPrefix + JSON.stringify([normalizeWord(word.german), normalizeWord(word.english)]);
+  const wordKeys = new Set();
+  let deckReady = false;
+
+  function includeWord(word) {
+    if (!word || typeof word.german !== "string" || typeof word.english !== "string" ||
+        !word.german.trim() || !word.english.trim()) return false;
+    const key = wordKey(word);
+    if (wordKeys.has(key)) return false;
+    wordKeys.add(key);
+    vocab.push(word);
+    if (currentWord && !reviewRound) {
+      wordQueue.push(word);
+      roundSize++;
+      refreshOptionStates();
+      updateProgressUI();
+    }
+    return true;
+  }
+
+  function loadSavedWords() {
+    for (const key of Object.keys(localStorage)) {
+      if (!key.startsWith(wordPrefix)) continue;
+      try { includeWord(JSON.parse(localStorage.getItem(key))); }
+      catch (error) { if (!(error instanceof SyntaxError)) throw error; }
+    }
+  }
+
+  byId("addWordForm").addEventListener("submit", event => {
+    event.preventDefault();
+    if (!deckReady) return;
+    const word = {
+      german: byId("newGerman").value.trim(),
+      english: byId("newEnglish").value.trim(),
+      plural: byId("newPlural").value.trim(),
+      example: byId("newExample").value.trim()
+    };
+    const status = byId("saveStatus");
+    if (!word.german || !word.english) {
+      status.textContent = "Enter the German word and its English meaning.";
+      return;
+    }
+    const key = wordKey(word);
+    try {
+      if (wordKeys.has(key) || localStorage.getItem(key) !== null) {
+        status.textContent = "This word and meaning are already in your deck.";
+        return;
+      }
+      localStorage.setItem(key, JSON.stringify(word));
+    } catch {
+      status.textContent = "Could not save. Check that your browser allows site storage and has free space.";
+      return;
+    }
+    includeWord(word);
+    event.target.reset();
+    byId("newGerman").focus();
+    status.textContent = currentWord && !reviewRound
+      ? "Saved “" + word.german + "”. It’s ready to practice next."
+      : "Saved “" + word.german + "” for your next full round.";
+  });
+
+  window.addEventListener("storage", event => {
+    if (deckReady && event.key?.startsWith(wordPrefix) && event.newValue) {
+      try { includeWord(JSON.parse(event.newValue)); }
+      catch (error) { if (!(error instanceof SyntaxError)) throw error; }
+    }
+  });
+
   function startRound(cards, review = false) {
     wordQueue = shuffle(cards);
     missed = [];
@@ -310,7 +400,7 @@
     updateMetaVisibility();
     const correct = currentWord.english;
     const normalize = text => text.trim().toLowerCase();
-    const excluded = new Set(vocab.filter(w => w.german === currentWord.german).map(w => normalize(w.english)));
+    const excluded = new Set(vocab.filter(w => normalizeWord(w.german) === normalizeWord(currentWord.german)).map(w => normalize(w.english)));
     const unique = new Map();
     for (const word of vocab) {
       const key = normalize(word.english);
@@ -474,6 +564,14 @@
         alert("vocab.csv loaded but no words found. Check that it uses semicolons (;) as separators.");
         return;
       }
+      for (const word of vocab) wordKeys.add(wordKey(word));
+      try {
+        loadSavedWords();
+        byId("saveWord").disabled = false;
+      } catch {
+        byId("saveStatus").textContent = "Saving words requires browser storage. You can still practice the built-in deck.";
+      }
+      deckReady = true;
       startRound(vocab);
     })
     .catch(() => {
